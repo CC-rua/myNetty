@@ -28,6 +28,10 @@ public class NettyServerHandler_IN extends ChannelInboundHandlerAdapter {
         SocketAddress clientAddress = ctx.channel().remoteAddress();
         System.out.println("client address: " + clientAddress);
         ByteBuf byteBuf = (ByteBuf) msg;
+        int mainOder = byteBuf.readInt();
+        int subOder = byteBuf.readInt();
+        System.out.println("mainOder = " + mainOder);
+        System.out.println("subOder = " + subOder);
         System.out.println("client data : " + byteBuf.toString(StandardCharsets.UTF_8));
     }
 

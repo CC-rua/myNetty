@@ -14,11 +14,6 @@ import io.netty.util.concurrent.EventExecutorGroup;
 public class NettyServerHandler_OUT extends ChannelOutboundHandlerAdapter {
 
     @Override
-    public void read(ChannelHandlerContext ctx) throws Exception {
-        System.out.println("outbound read...");
-    }
-
-    @Override
     public void write(ChannelHandlerContext ctx, Object msg, ChannelPromise promise) throws Exception {
         System.out.println("outbound write...");
     }
