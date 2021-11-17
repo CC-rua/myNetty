@@ -1,0 +1,7 @@
+import Comm.CommObj.ripro
+
+RiProtocol C2S_001_001_R_ClientConnect <1,1>
+{
+    string ip[客户端ip地址];
+    int port[客户端端口];
+}

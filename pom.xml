@@ -12,6 +12,7 @@
         <module>myClient</module>
         <module>myServer</module>
         <module>myProtocol</module>
+        <module>myCommon</module>
     </modules>
 
     <properties>

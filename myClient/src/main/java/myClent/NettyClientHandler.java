@@ -27,4 +27,9 @@ public class NettyClientHandler extends ChannelInboundHandlerAdapter {
         buf.writeInt(2);
         ctx.writeAndFlush(buf.duplicate());
     }
+
+    @Override
+    public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
+        System.out.println("client accept :" + msg);
+    }
 }
