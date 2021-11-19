@@ -4,8 +4,6 @@ import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.util.ArrayList;
 
-import ALServerLog.ALServerLog;
-
 public class CoreLogger {
     private static final int LOG_LEVEL_TRACE = 0;
     private static final int LOG_LEVEL_DEBUG = 10;

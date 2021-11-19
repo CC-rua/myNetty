@@ -1,5 +1,6 @@
 package refData;
 
+import file.CommFile;
 import react.ReactUtil;
 
 import java.io.File;
@@ -12,11 +13,11 @@ import java.util.Map.Entry;
  * @author: ricci
  * @date: 2021-11-17 19:24:58
  */
-public abstract class _ARefDataMgr extends _ARef {
+public abstract class _ARefDataMgr<T extends _ARefData> extends _ARef {
     /**
      * 资源数据管理器集合
      */
-    private Map<RefIndex, _ARefContainerMgr> _m_RefMgrMap;
+    private Map<RefDataIndex, T> _m_RefMgrMap;
 
     /**
      * 初始化配置文件
@@ -93,9 +94,9 @@ public abstract class _ARefDataMgr extends _ARef {
                 System.out.println("RefDataMgr Had load Ref type: " + refType);
                 return false;
             }
-            //通过配置文件初始化
-            _ARefContainerMgr mgr = loadRefFromFileByClass(c);
-            RefIndex mgrIndex = makeMgrIndex(mgr);
+            //通过配置内容解析类初始化
+            T mgr = loadRefFromFileByClass(c);
+            RefDataIndex mgrIndex = makeMgrIndex(mgr);
             _m_RefMgrMap.put(mgrIndex, mgr);
         }
         return true;
@@ -104,30 +105,87 @@ public abstract class _ARefDataMgr extends _ARef {
     /**
      * 构造 ContainerMgr 的索引信息
      *
-     * @param _mgr _ARefContainerMgr
-     * @return RefIndex
+     * @param _mgr T
+     * @return RefDataIndex
      */
-    public RefIndex makeMgrIndex(_ARefContainerMgr _mgr) {
+    public RefDataIndex makeMgrIndex(T _mgr) {
         if (_mgr == null) {
             return null;
         }
-        return RefIndex.builder()
+        return RefDataIndex.builder()
                 ._m_RefType(_mgr.getRefType())
                 ._m_RefTableName(_mgr.getTableName())
+                ._m_refData(_mgr)
                 .build();
     }
 
     /**
-     * 通过加载对应的配置文件 初始化一个 _ARefContainerMgr
+     * 通过加载对应的配置文件 初始化一个 T
      *
      * @param _cls _ARefData 配置文件单元
-     * @return _ARefContainerMgr
+     * @return T
      */
-    public _ARefContainerMgr loadRefFromFileByClass(_ARefData _cls) {
+    public T loadRefFromFileByClass(_ARefData _cls) {
         //检查是否带有配表注解
-        RefTable tableAnnotation = _cls.getClass().getAnnotation(RefTable.class);
-        if (tableAnnotation == null) {
-            return null;
+        RefTable tableInfo = _cls.getClass().getAnnotation(RefTable.class);
+        boolean isEmptyTable = false;
+        if (tableInfo != null) {
+            isEmptyTable = tableInfo.emptyTable();
+        }
+        T mgr = _cls.createContainerMgr();
+        mgr.setOwner(this);
+        if (!isEmptyTable) {
+            //拼装出文件所在路径
+            String path = String.format("%s%c%s.txt", getRefPath(), File.separatorChar, mgr.getTableName().toLowerCase());
+            //读取文件内容加载配置
+            loadTableFromFile(_cls, mgr, path);
+        }
+        return mgr;
+    }
+
+    /**
+     * 读取文件内存加载配表
+     *
+     * @param _cls  配置文件对应的数据解析类
+     * @param _mgr  数据解析类的管理器
+     * @param _path 文件所在位置
+     */
+    public void loadTableFromFile(_ARefData _cls, T _mgr, String _path) {
+        String fileStr = CommFile.getStringFromFile(_path);
+        if (fileStr == null || fileStr.isEmpty()) {
+            System.out.println("txt is empty for file: " + _path);
+            return;
+        }
+        //通过字符数据加载
+        loadTableFromStr(_cls, _mgr, fileStr);
+    }
+
+    /**
+     * 通过字符数据加载配表
+     *
+     * @param _cls     配置文件对应的数据解析类
+     * @param _mgr     数据解析类的管理器
+     * @param _fileStr 文件字符
+     */
+    private void loadTableFromStr(_ARefData _cls, T _mgr, String _fileStr) {
+
+    }
+
+    /**
+     * 通过类查找 T
+     *
+     * @param _refData 配置文件类
+     * @return T
+     */
+    public T lookupContainerByClass(_ARefData _refData) {
+        for (Entry<RefDataIndex, T> entry : _m_RefMgrMap.entrySet()) {
+            if (entry == null) {
+                continue;
+            }
+            if (!entry.getKey().is(_refData)) {
+                continue;
+            }
+            return entry.getValue();
         }
         return null;
     }
@@ -136,10 +194,10 @@ public abstract class _ARefDataMgr extends _ARef {
      * 通过类型查找 RefContainerMgr
      *
      * @param _refType 配置类型
-     * @return _ARefContainerMgr
+     * @return T
      */
-    public _ARefContainerMgr lookupContainerByRefType(ERefType _refType) {
-        for (Entry<RefIndex, _ARefContainerMgr> entry : _m_RefMgrMap.entrySet()) {
+    public T lookupContainerByRefType(ERefType _refType) {
+        for (Entry<RefDataIndex, T> entry : _m_RefMgrMap.entrySet()) {
             if (entry == null) {
                 continue;
             }
