@@ -38,8 +38,8 @@ public class ReactUtil {
                 continue;
             }
             //跳过接口和抽象类
-            if (Modifier.isInterface(_interfaceType.getModifiers())
-                    || Modifier.isAbstract(_interfaceType.getModifiers())) {
+            if (Modifier.isInterface(cls.getModifiers())
+                    || Modifier.isAbstract(cls.getModifiers())) {
                 continue;
             }
             //跳过自己
@@ -59,7 +59,7 @@ public class ReactUtil {
      */
     public static Set<Class<?>> getAllClassByPath(String _packageName) {
         //替换路径分隔符
-        String packPath = _packageName.replace('.', '/');
+        String packPath = _packageName.replace('.', File.separatorChar);
         Set<Class<?>> classes = new HashSet<>();
         //根据当前线程上下文类加载器得到路径下的所有类
         try {
@@ -109,19 +109,20 @@ public class ReactUtil {
                 continue;
             }
             //是目录不是文件
-            if (file.isDirectory()) {
-                scanFileGetAllClass(_packageName + "." + file.getName(), file.getAbsolutePath(), _classes);
+            if (subFile.isDirectory()) {
+                scanFileGetAllClass(_packageName + "." + subFile.getName(), subFile.getAbsolutePath(), _classes);
             } else {
 
-                String javaFileName = file.getName();
+                String javaFileName = subFile.getName();
                 //是一个 java 文件
                 if (javaFileName.endsWith(".class")) {
                     javaFileName = javaFileName.substring(0, javaFileName.length() - 6);
                     //通过文件名调用类加载器，加载一个class
                     try {
-                        _classes.add(ClassLoader.getSystemClassLoader().loadClass(javaFileName));
+                        ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
+                        _classes.add(classLoader.loadClass(_packageName + "." + javaFileName));
                     } catch (ClassNotFoundException e) {
-                        System.out.println("class load fail name: " + javaFileName);
+                        System.out.println("class load fail name: " + _packageName + "." + javaFileName);
                         e.printStackTrace();
                     }
                 }

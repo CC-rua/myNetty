@@ -23,9 +23,9 @@ public abstract class _ARefData extends _ARef {
     /**
      * 创建管理该对象的管理器
      *
-     * @param <T> <T extends _ARefData>
+     * @return _ARefData
      */
-    public abstract <T extends _ARefData> T createContainerMgr();
+    public abstract _ARefContainerMgr<? extends _ARef> createContainerMgr();
 
     /**
      * 设置管理该对象管理器的管理者

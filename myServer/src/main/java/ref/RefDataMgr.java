@@ -11,8 +11,8 @@ import java.io.File;
  * @author: ricci
  * @date: 2021-11-19 15:12:22
  */
-public class RefDataMgr extends _ARefDataMgr<_ARefContainerMgr> {
-    private String _m_refDataPath = "../data" + File.pathSeparator + "refData";
+public class RefDataMgr extends _ARefDataMgr {
+    private String _m_refDataPath = ".." + File.separator + "data" + File.separator + "refData";
 
     private static RefDataMgr _m_instance = new RefDataMgr();
 
@@ -35,7 +35,7 @@ public class RefDataMgr extends _ARefDataMgr<_ARefContainerMgr> {
     }
 
     @Override
-    public Class<? extends _ARef> getRefDataClassName() {
-        return null;
+    public Class<? extends _ARef> getRefDataClass() {
+        return _ARefGameData.class;
     }
 }

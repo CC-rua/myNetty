@@ -23,13 +23,13 @@ public class RefDataIndex extends _ARef {
     /**
      * 数据
      */
-    private _ARefData _m_refData;
+    private _ARefContainerMgr<? extends _ARef> _m_refData;
 
     public boolean is(ERefType _refType) {
         return _m_RefType == _refType;
     }
 
-    public boolean is(_ARefData _refData) {
+    public boolean is(_ARefContainerMgr<? extends _ARef> _refData) {
         return _m_refData.equals(_refData);
     }
 
