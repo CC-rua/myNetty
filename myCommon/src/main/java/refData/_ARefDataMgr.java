@@ -4,6 +4,7 @@ import file.CommFile;
 import react.ReactUtil;
 
 import java.io.File;
+import java.lang.reflect.Field;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -97,7 +98,7 @@ public abstract class _ARefDataMgr extends _ARef {
                 return false;
             }
             //通过配置内容解析类初始化
-            _ARefContainerMgr<? extends _ARef> mgr = loadRefFromFileByClass(c);
+            _ARefContainerMgr<? extends _ARef> mgr = loadRefFromFileByClass(cls);
             RefDataIndex mgrIndex = makeMgrIndex(mgr);
             _m_RefMgrMap.put(mgrIndex, mgr);
         }
@@ -127,20 +128,29 @@ public abstract class _ARefDataMgr extends _ARef {
      * @param _cls _ARefContainerMgr<? extends _ARef> 配置文件单元
      * @return _ARefData
      */
-    public _ARefContainerMgr<? extends _ARef> loadRefFromFileByClass(_ARefData _cls) {
+    public _ARefContainerMgr<? extends _ARef> loadRefFromFileByClass(Class<?> _cls) {
         //检查是否带有配表注解
-        RefTable tableInfo = _cls.getClass().getAnnotation(RefTable.class);
+        _ARefData cls = null;
+        try {
+            cls = (_ARefData) _cls.newInstance();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        if (cls == null) {
+            return null;
+        }
+        RefTable tableInfo = cls.getClass().getAnnotation(RefTable.class);
         boolean isEmptyTable = false;
         if (tableInfo != null) {
             isEmptyTable = tableInfo.emptyTable();
         }
-        _ARefContainerMgr<? extends _ARef> mgr = _cls.createContainerMgr();
+        _ARefContainerMgr<? extends _ARef> mgr = cls.createContainerMgr();
         mgr.setOwner(this);
         if (!isEmptyTable) {
             //拼装出文件所在路径
             String path = String.format("%s%c%s.txt", getRefPath(), File.separatorChar, mgr.getTableName().toLowerCase());
             //读取文件内容加载配置
-            loadTableFromFile(_cls, mgr, path);
+            loadTableFromFile(cls, mgr, path);
         }
         return mgr;
     }
@@ -169,7 +179,7 @@ public abstract class _ARefDataMgr extends _ARef {
      * @param _mgr     数据解析类的管理器
      * @param _fileStr 文件字符
      */
-    private void loadTableFromStr(_ARefData _cls, _ARefContainerMgr<? extends _ARef> _mgr, String _fileStr) {
+    private  void loadTableFromStr(_ARefData _cls, _ARefContainerMgr<? extends _ARef> _mgr, String _fileStr) {
         String[] lines = _fileStr.split("\n");
         if (lines.length <= 0) {
             return;
@@ -181,15 +191,26 @@ public abstract class _ARefDataMgr extends _ARef {
             Map<String, String> tempLineParamMap = new HashMap<>();//每行数据
             String[] lineParam = lines[i].split("\t");
             //遍历行数据
-            for (int j = 0; j < lineParam.length; j++) {
+            for (int j = 0; j < tableHead.length; j++) {
                 if (lineParam[j] == null) {
                     continue;
                 }
-                String trim = lineParam[j].trim();
-                tempLineParamMap.put(tableHead[j], lineParam[j]);
-
-                //TODO
+                String contain = lineParam[j].trim();
+                String head = tableHead[j].trim();
+                tempLineParamMap.put(head, contain);
             }
+            //设置字段值
+            try {
+                for (Entry<String, String> entry : tempLineParamMap.entrySet()) {
+                    Field field = _cls.getClass().getField(entry.getKey());
+                    field.set(_cls, entry.getValue());
+                }
+                _mgr.castElement(_cls);
+                _mgr.addElement(_cls);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+
         }
     }
 

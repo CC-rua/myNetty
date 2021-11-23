@@ -20,4 +20,13 @@ public abstract class _ARefGameContainerMgr<K, T extends _ARefGameData> extends 
         _m_owner = _mgr;
     }
 
+    @Override
+    public void addElement(T _element) {
+        _m_list.add(_element);
+    }
+
+    @Override
+    public T castElement(_ARefData _cls) {
+        return null;
+    }
 }
