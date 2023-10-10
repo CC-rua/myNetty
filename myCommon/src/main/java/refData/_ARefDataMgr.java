@@ -206,7 +206,7 @@ public abstract class _ARefDataMgr extends _ARef {
                     field.set(_cls, entry.getValue());
                 }
                 _mgr.castElement(_cls);
-                _mgr.addElement(_cls);
+//                _mgr.addElement(_cls);
             } catch (Exception e) {
                 e.printStackTrace();
             }

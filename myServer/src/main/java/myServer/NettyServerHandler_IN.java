@@ -59,4 +59,9 @@ public class NettyServerHandler_IN extends ChannelInboundHandlerAdapter {
     public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) throws Exception {
         super.exceptionCaught(ctx, cause);
     }
+
+    @Override
+    public void userEventTriggered(ChannelHandlerContext ctx, Object evt) throws Exception {
+        System.out.println("事件触发- channel id {" + ctx.channel().id() + "} evt:{" + evt+ "}");
+    }
 }

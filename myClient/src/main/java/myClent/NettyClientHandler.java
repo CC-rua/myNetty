@@ -32,4 +32,9 @@ public class NettyClientHandler extends ChannelInboundHandlerAdapter {
     public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
         System.out.println("client accept :" + msg);
     }
+
+    @Override
+    public void userEventTriggered(ChannelHandlerContext ctx, Object evt) throws Exception {
+        System.out.println("事件触发- channel id {" + ctx.channel().id() + "} evt:{" + evt+ "}");
+    }
 }
